@@ -49,13 +49,17 @@
             <url>http://stephen.genoprime.com</url>
         </contributor>
     </contributors>
-    <inceptionYear>2012</inceptionYear>
+    <inceptionYear>2017</inceptionYear>
     <licenses>
         <license>
             <name>The Apache Software License, Version 2.0</name>
             <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
         </license>
     </licenses>
+    <organization>
+        <name>JanusGraph Authors</name>
+        <url>http://janusgraph.org/</url>
+    </organization>
     <scm>
         <connection>scm:git:git@github.com:JanusGraph/janusgraph.git</connection>
         <developerConnection>scm:git:git@github.com:JanusGraph/janusgraph.git</developerConnection>
@@ -120,6 +124,13 @@
         <test.excluded.groups>org.janusgraph.testcategory.MemoryTests,org.janusgraph.testcategory.PerformanceTests,org.janusgraph.testcategory.BrittleTests</test.excluded.groups>
         <dependency.locations.enabled>false</dependency.locations.enabled>
         <cassandra-driver.version>3.1.4</cassandra-driver.version>
+        <license.licenseName>apache_v2</license.licenseName>
+        <license.failOnMissingHeader>true</license.failOnMissingHeader>
+        <license.addJavaLicenseAfterPackage>false</license.addJavaLicenseAfterPackage>
+        <license.includes>**/*.java</license.includes>
+        <license.processStartTag>==</license.processStartTag>
+        <license.processEndTag>=</license.processEndTag>
+        <license.sectionDelimiter>===========================================================================</license.sectionDelimiter>
     </properties>
     <modules>
         <module>janusgraph-codepipelines-ci</module>
@@ -472,6 +483,12 @@
                     <artifactId>jacoco-maven-plugin</artifactId>
                     <version>0.7.9</version>
                 </plugin>
+                <plugin>
+                  <groupId>org.codehaus.mojo</groupId>
+                  <artifactId>license-maven-plugin</artifactId>
+                  <version>1.14</version>
+                </plugin>
+
             </plugins>
         </pluginManagement>
     </build>
