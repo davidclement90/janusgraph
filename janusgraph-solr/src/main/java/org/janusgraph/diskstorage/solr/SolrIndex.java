@@ -860,9 +860,9 @@ public class SolrIndex implements IndexProvider {
             }
             logger.debug("Clearing storage from Solr: {}", solrClient);
             final ZkStateReader zkStateReader = ((CloudSolrClient) solrClient).getZkStateReader();
-            zkStateReader.updateClusterState();
+            zkStateReader.forciblyRefreshAllClusterStateSlow();
             final ClusterState clusterState = zkStateReader.getClusterState();
-            for (final String collection : clusterState.getCollections()) {
+            for (final String collection : clusterState.getCollectionsMap().keys()) {
                 logger.debug("Clearing collection [{}] in Solr",collection);
                 final CollectionAdminRequest.Delete request = CollectionAdminRequest.deleteCollection(collection);
                 solrClient.request(request, collection);
@@ -976,7 +976,7 @@ public class SolrIndex implements IndexProvider {
         final CloudSolrClient server = (CloudSolrClient) solrClient;
         try {
             final ZkStateReader zkStateReader = server.getZkStateReader();
-            zkStateReader.updateClusterState();
+            zkStateReader.forciblyRefreshAllClusterStateSlow();
             final ClusterState clusterState = zkStateReader.getClusterState();
             final Map<String, DocCollection> collections = clusterState.getCollectionsMap();
             return collections != null && !collections.isEmpty();
@@ -1031,13 +1031,8 @@ public class SolrIndex implements IndexProvider {
             // This was the default behavior before a default configSet could be specified
             final String  genericConfigSet = config.has(SOLR_DEFAULT_CONFIG) ? config.get(SOLR_DEFAULT_CONFIG):collection;
 
-            final CollectionAdminRequest.Create createRequest = new CollectionAdminRequest.Create();
-
-            createRequest.setConfigName(genericConfigSet);
-            createRequest.setCollectionName(collection);
-            createRequest.setNumShards(numShards);
-            createRequest.setMaxShardsPerNode(maxShardsPerNode);
-            createRequest.setReplicationFactor(replicationFactor);
+            final CollectionAdminRequest.Create createRequest = new CollectionAdminRequest.Create(collection, genericConfigSet, numShards, replicationFactor);
+            createRequest.setMaxShardsPerNode(maxShardsPerNode);;
 
             final CollectionAdminResponse createResponse = createRequest.process(client);
             if (createResponse.isSuccess()) {
@@ -1055,7 +1050,7 @@ public class SolrIndex implements IndexProvider {
      */
     private static boolean checkIfCollectionExists(CloudSolrClient server, String collection) throws KeeperException, InterruptedException {
         final ZkStateReader zkStateReader = server.getZkStateReader();
-        zkStateReader.updateClusterState();
+        zkStateReader.forceUpdateCollection(collection);
         final ClusterState clusterState = zkStateReader.getClusterState();
         return clusterState.getCollectionOrNull(collection) != null;
     }
@@ -1070,7 +1065,7 @@ public class SolrIndex implements IndexProvider {
 
             while (cont) {
                 boolean sawLiveRecovering = false;
-                zkStateReader.updateClusterState();
+                zkStateReader.forceUpdateCollection(collection);
                 final ClusterState clusterState = zkStateReader.getClusterState();
                 final Map<String, Slice> slices = clusterState.getSlicesMap(collection);
                 Preconditions.checkNotNull(slices, "Could not find collection:" + collection);

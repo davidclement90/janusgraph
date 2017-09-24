@@ -111,7 +111,7 @@
        <dependency>
            <groupId>org.noggit</groupId>
            <artifactId>noggit</artifactId>
-           <version>0.6</version>
+           <version>0.8</version>
        </dependency>
        <!-- We keep the gremlin version of org.apache.commons commons-lang3 -->
        <dependency>
